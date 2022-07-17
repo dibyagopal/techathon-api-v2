@@ -7,6 +7,7 @@ import { Skill } from './entity/skill.entity';
 import { SkillLevel } from './entity/skillLevel.entity';
 import { TrainingRequest } from './entity/trainingRequest.entity';
 import { TrainingRequestTrainer } from './entity/trainingRequestTrainer.entity';
+import { TrainingAnnouncement } from './entity/traningAnnouncement.entity';
 import { User } from './entity/user.entity';
 import { UsersModule } from './users/users.module';
 
@@ -19,7 +20,7 @@ import { UsersModule } from './users/users.module';
       username: 'tbdb',
       password: 'i9bf!j8NUqB7M6i',
       database: 'techathonDa',
-      entities: [User, Project, Skill, SkillLevel, TrainingRequest, TrainingRequestTrainer],
+      entities: [User, Project, Skill, SkillLevel, TrainingRequest, TrainingRequestTrainer, TrainingAnnouncement],
       synchronize: false,
     }),
     UsersModule,

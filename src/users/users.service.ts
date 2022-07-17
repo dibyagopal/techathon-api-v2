@@ -5,9 +5,10 @@ import { Skill } from 'src/entity/skill.entity';
 import { SkillLevel } from 'src/entity/skillLevel.entity';
 import { TrainingRequest } from 'src/entity/trainingRequest.entity';
 import { TrainingRequestTrainer } from 'src/entity/trainingRequestTrainer.entity';
+import { TrainingAnnouncement } from 'src/entity/traningAnnouncement.entity';
 import { User } from 'src/entity/user.entity';
 import { Repository } from 'typeorm';
-import { EmailDto, RequestForTrainingDto } from './users.dto';
+import { EmailDto, RequestForTrainingDto, TrainingAnnouncementDto } from './users.dto';
 //import SendGrid from "@sendgrid/mail";
 const SendGrid = require('@sendgrid/mail');
 
@@ -20,6 +21,7 @@ export class UsersService {
     @InjectRepository(Project) private projectRepository: Repository<Project>,
     @InjectRepository(TrainingRequest) private trainingRequestRepository: Repository<TrainingRequest>,
     @InjectRepository(TrainingRequestTrainer) private trainingRequestTrainerRepository: Repository<TrainingRequestTrainer>,
+    @InjectRepository(TrainingAnnouncement) private trainingAnnouncementRepository: Repository<TrainingAnnouncement>,
     
   ) {}
 
@@ -54,6 +56,21 @@ export class UsersService {
   saveTrainingRequest(requestForTrainingDto:RequestForTrainingDto): Promise<TrainingRequest> {
     const insertData = this.trainingRequestRepository.save(requestForTrainingDto);
     return insertData;
+  }
+
+  saveTrainingAnnouncement(trainingAnnouncementDto:TrainingAnnouncementDto): Promise<TrainingAnnouncement> {
+    const insertData = this.trainingAnnouncementRepository.save(trainingAnnouncementDto);
+    return insertData;
+  }
+
+  findAllTrainingAnnouncement(): Promise<TrainingAnnouncement[]> {
+    return this.trainingAnnouncementRepository.find({
+      order: {
+        // name: "ASC",
+        // id: "DESC"
+        id: 'DESC'
+      }
+    });
   }
 
   saveTrainingRequestTrainer(request_id: number, trainer_id: number): Promise<TrainingRequestTrainer> {

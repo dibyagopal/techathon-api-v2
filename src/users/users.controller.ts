@@ -5,6 +5,7 @@ import { RequestForTrainingDto, TrainingAnnouncementDto } from './users.dto';
 import { ApiBody } from '@nestjs/swagger';
 import { Response } from 'express';
 import { MailService } from 'src/services/mail/mail.service';
+import { TrainingAnnouncement } from 'src/entity/traningAnnouncement.entity';
 const getDb = new DbService();
 
 @Controller('users')
@@ -13,11 +14,6 @@ export class UsersController {
 
   @Get('all')
   async findAllUser() {
-   //const someQuery = entityManager.query('select * from UsersMaster');
-   //const entityManager = await getDb.query('select * from UsersMaster');
-   //return someQuery;
-   //console.log(entityManager.data);
-   
     return await this.userService.findAllUser();
   }
 
@@ -128,7 +124,11 @@ export class UsersController {
   @Post('training-announcement')
   async trainingAnnouncement(@Body() params: TrainingAnnouncementDto, @Res() response: Response) {
 
+    const requestData = await this.userService.saveTrainingAnnouncement(params);
 
+    return response.status(HttpStatus.OK).send(requestData);
+
+    /*
     const currentUser = await this.userService.findOneUser(params.user_id);
     const userSkills = await getDb.query<{skill_name: string, proficiency_level_name: string}[]>(`
       SELECT * FROM UserSkillAssociation as usa 
@@ -198,5 +198,52 @@ export class UsersController {
 
     response.status(HttpStatus.OK)
     .send(true);
+    */
+  }
+
+  @Get('get-all-announcement')
+  async findAllAnnouncement(@Res() response: Response) {
+    const asyncForEach = async (array: any, callback: Function) => {
+      for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+      }
+    };
+
+    const findAllAnnouncement = await this.userService.findAllTrainingAnnouncement();
+    const data:any = [];
+
+    await asyncForEach(findAllAnnouncement, async (eachChunk: TrainingAnnouncement) => {
+      const currentUser = await this.userService.findOneUser(eachChunk.user_id);
+      const userSkills = await getDb.query<{skill_name: string, proficiency_level_name: string}[]>(`
+        SELECT * FROM UserSkillAssociation as usa 
+        join SkillMaster sm on sm.id=usa.skill_id 
+        join SkillLevelMaster alm on alm.id = usa.skill_level_id WHERE usa.user_id=${eachChunk.user_id}
+      `);
+
+      const userSkillsArray = userSkills.data.map(eachData=>{
+        return `${eachData.skill_name} - ${eachData.proficiency_level_name}`
+      });
+      const userSkillsArrayString = userSkillsArray.join(', ');
+
+      const userProjects = await getDb.query<{project_name: string}[]>(`
+        SELECT * FROM ProjectMaster WHERE id in (SELECT project_id from ProjectUserAssociation WHERE user_id=${eachChunk.user_id})
+      `);
+
+      const userProjectsArray = userProjects.data.map(eachData=>{
+        return `${eachData.project_name}`
+      });
+
+      const userProjectsArrayString = userProjectsArray.join(', ');
+      data.push({
+        ...eachChunk,
+        ...currentUser,
+        //skills: userSkills.data,
+        skillsString: userSkillsArrayString,
+        //projects: userProjects.data,
+        projectsString: userProjectsArrayString
+      })
+    });
+
+    return response.status(HttpStatus.OK).send(data);
   }
 }
