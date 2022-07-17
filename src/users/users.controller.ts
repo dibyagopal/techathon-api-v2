@@ -111,7 +111,7 @@ export class UsersController {
       um.user_image as request_by_image
       FROM TrainingRequest as tr
       join SkillMaster as sm on sm.id=tr.skill_id
-      join ProjectMaster pm on pm.id=tr.project_id
+      LEFT JOIN ProjectMaster pm on pm.id=tr.project_id
       join UsersMaster as um on um.id=tr.user_id 
       
       JOIN TrainingRequestTrainers as trm on trm.request_id=tr.id
