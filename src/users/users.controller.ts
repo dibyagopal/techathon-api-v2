@@ -83,20 +83,44 @@ export class UsersController {
     if(getRelatedTrainers && getRelatedTrainers.data && getRelatedTrainers.data.length){
       trainers.forEach(eachData => {
         this.userService.saveTrainingRequestTrainer(addedData.id,eachData.trainer_id);
-         this.userService.sendEmailForTrainingRequest(
-          eachData.trainer_email,
-          eachData.trainer_name,
-          currentUser.user_name,
-          params.topic_type,
-          project.project_name,
-          skill.skill_name,
-          params.notes
-        );
+        // this.userService.sendEmailForTrainingRequest(
+        //   eachData.trainer_email,
+        //   eachData.trainer_name,
+        //   currentUser.user_name,
+        //   params.topic_type,
+        //   project.project_name,
+        //   skill.skill_name,
+        //   params.notes
+        // );
       });
     }
 
     response.status(HttpStatus.OK)
     .send(addedData);
+  }
+
+  @Get('get-training-request/:user_id')
+  async getAllRequest(
+    @Param('user_id') user_id: number,
+    @Res() response: Response
+  ) {
+    const getAllRequests = await getDb.query(
+      `SELECT tr.id as request_id, tr.topic_type, tr.notes as request_note, pm.project_name, sm.skill_name, 
+      um.id as request_by_id, 
+      um.user_name as request_by_name, 
+      um.user_image as request_by_image
+      FROM TrainingRequest as tr
+      join SkillMaster as sm on sm.id=tr.skill_id
+      join ProjectMaster pm on pm.id=tr.project_id
+      join UsersMaster as um on um.id=tr.user_id 
+      
+      JOIN TrainingRequestTrainers as trm on trm.request_id=tr.id
+      where trm.trainer_id=${user_id}
+      GROUP by tr.id;`
+    );
+
+    response.status(HttpStatus.OK)
+    .send(getAllRequests.data);
   }
 
   @ApiBody({ type: TrainingAnnouncementDto })
@@ -157,17 +181,17 @@ export class UsersController {
 
       trainers.forEach(eachData => {
         //this.userService.saveTrainingRequestTrainer(addedData.id,eachData.trainer_id);
-        this.userService.sendEmailForTrainerAnnouncement(
-          eachData.user_email,
-          eachData.user_name,
-          currentUser.user_name,
-          userSkillsArrayString,
-          userProjectsArrayString,
-          params.available_date,
-          params.available_time_from,
-          params.available_time_to,
-          params.notes
-        );
+        // this.userService.sendEmailForTrainerAnnouncement(
+        //   eachData.user_email,
+        //   eachData.user_name,
+        //   currentUser.user_name,
+        //   userSkillsArrayString,
+        //   userProjectsArrayString,
+        //   params.available_date,
+        //   params.available_time_from,
+        //   params.available_time_to,
+        //   params.notes
+        // );
       });
     
 
