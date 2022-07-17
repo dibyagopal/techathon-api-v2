@@ -116,7 +116,8 @@ export class UsersController {
       
       JOIN TrainingRequestTrainers as trm on trm.request_id=tr.id
       where trm.trainer_id=${user_id}
-      GROUP by tr.id;`
+      GROUP by tr.id
+      order by tr.id DESC`
     );
 
     response.status(HttpStatus.OK)
